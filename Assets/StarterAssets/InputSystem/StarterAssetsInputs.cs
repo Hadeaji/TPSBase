@@ -14,7 +14,6 @@ namespace StarterAssets
 		public bool sprint;
 		public bool aim;
 		public bool charge;
-		public bool shoot;
 
 		[Header("Movement Settings")]
 		public bool analogMovement;
@@ -57,7 +56,6 @@ namespace StarterAssets
 		public void OnShoot(InputValue value)
 		{
 			ChargeInput(value.isPressed);
-			ShootInput(!value.isPressed);
 		}
 #else
 	// old input sys if we do decide to have it (most likely wont)...
@@ -87,11 +85,6 @@ namespace StarterAssets
 		public void AimInput(bool newAimState)
 		{
 			aim = newAimState;
-		}
-
-		public void ShootInput(bool newShootState)
-		{
-			shoot = newShootState;
 		}
 
 		public void ChargeInput(bool newChargeState)

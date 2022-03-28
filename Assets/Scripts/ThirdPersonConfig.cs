@@ -16,11 +16,21 @@ public class ThirdPersonConfig : MonoBehaviour
     [SerializeField] private Transform pfBulletProjectile;
     [SerializeField] private Transform spawnBulletPosition;
 
+    [SerializeField] private GameObject vfxShootPoint;
+    [SerializeField] private List<GameObject> vfx = new List<GameObject>();
+    [SerializeField] private GameObject effectToSpawn;
+
+
+    [SerializeField] private Transform vfxHitGreen;
+    [SerializeField] private Transform vfxHitRed;
+
+    private GameObject arrowPlaceholder;
+
     private ThirdPersonController thirdPersonController;
     private StarterAssetsInputs starterAssetsInputs;
     private Animator animator;
-    private Transform rightArmIKTarget;
     private Vector3 mouseWorldPosition;
+    private Transform hitTransform = null;
 
     private float aimRigWieght = 1f;
 
@@ -32,36 +42,41 @@ public class ThirdPersonConfig : MonoBehaviour
     [SerializeField] private float maxChargeMultiplier = 3f;
     private float timeDelay = 1f;
     private float timer = 0f;
+    private bool isShooting = false;
+
 
     [SerializeField] private float reloadTimer = 0.2f;
     //
 
     // animation IDs
-    private int _animIDCharge;
-
-    //private Vector3 chargeTargetOriginal;
-    //private Vector3 chargeTargetMax = new Vector3(-0.154f, -0.853f, 0.298f);
+    private int _animIDShoot;
+    private int _animIDChargeProc;
 
     private void Awake()
     {
         starterAssetsInputs = GetComponent<StarterAssetsInputs>();
         thirdPersonController = GetComponent<ThirdPersonController>();
         animator = GetComponent<Animator>();
-        rightArmIKTarget = aimRig.GetComponent<LookAtObj>().rightArmIKTarget;
-        //chargeTargetOriginal = rightArmIKTarget.position;
         // initial mouse position
         mouseWorldPosition = Vector3.zero;
+
+        _animIDShoot = Animator.StringToHash("IsShooting");
+        _animIDChargeProc = Animator.StringToHash("Charge");
+    }
+
+    private void Start()
+    {
+        effectToSpawn = vfx[0];
     }
 
     private void Update()
     {
-        _animIDCharge = Animator.StringToHash("IsCharging");
+
         HandleWorldMousePositoion();
         HandleAim();
         HandleShooting();
 
-        // updating aim rig stat all time
-        aimRig.weight = Mathf.Lerp(aimRig.weight, aimRigWieght, Time.deltaTime * 20f);
+        HandleAimations();
     }
 
     private void OnAimStopped()
@@ -86,11 +101,14 @@ public class ThirdPersonConfig : MonoBehaviour
         // using ray cast with the default layer to find the point you are aiming at 
         Vector2 screenCenterPoint = new Vector2(Screen.width / 2f, Screen.height / 2f);
         Ray ray = Camera.main.ScreenPointToRay(screenCenterPoint);
+        
         if (Physics.Raycast(ray, out RaycastHit raycastHit, 999f, aimColliderLayerMask))
         {
             // change shoot transfor position
             shootPointTransform.position = raycastHit.point;
             mouseWorldPosition = raycastHit.point;
+
+            hitTransform = raycastHit.transform;
         }
 
     }
@@ -112,6 +130,13 @@ public class ThirdPersonConfig : MonoBehaviour
 
     private void AimAnimations()
     {
+        //Debug.Log(vfxShootPoint.transform.childCount);
+        //if (vfxShootPoint.transform.childCount == 0)
+        //{
+        //    arrowPlaceholder = Instantiate(effectToSpawn, vfxShootPoint.transform, false);
+        //    Debug.Log("it is there now");
+
+        //}
         // Aim Layer Animations 1 is the layer index 
         animator.SetLayerWeight(1, Mathf.Lerp(animator.GetLayerWeight(1), 1f, Time.deltaTime * 10f));
 
@@ -125,20 +150,27 @@ public class ThirdPersonConfig : MonoBehaviour
 
     private void HandleShooting()
     {
-        if (!starterAssetsInputs.aim)
+        if (!starterAssetsInputs.aim || isShooting)
         {
-            ChargeAnimation(false);
+            chargeMultiplier = initialChargeMultiplier;
+            animator.SetFloat(_animIDChargeProc, 0f);
+            //if (arrowPlaceholder)
+            //{
+            //    Debug.Log("Deleted");
+            //    Destroy(arrowPlaceholder);
+            //    arrowPlaceholder = null;
+            //}
             return;
         }
-        if (starterAssetsInputs.charge)
+        if (starterAssetsInputs.charge && !isShooting)
         {
             // initial shoot damage * charge damage multiplier ex: 0.5
             // increase charge damage multiplier with time * charge rate
             // cap the charge damage multiplier
-            Debug.Log("Charge Multiplier:" + chargeMultiplier);
-            Debug.Log("timer:" + timer);
             // charge animation
-            ChargeAnimation(true);
+            
+            ChargeAnimation();
+            
             timer += Time.deltaTime;
             if (timer >= timeDelay)
             {
@@ -147,6 +179,7 @@ public class ThirdPersonConfig : MonoBehaviour
                 {
                     chargeMultiplier += chargeRate;
                     // charge animation effect
+
                 } else
                 {
                     chargeMultiplier = maxChargeMultiplier;
@@ -154,33 +187,90 @@ public class ThirdPersonConfig : MonoBehaviour
                 }
             }
         }
-        if (starterAssetsInputs.shoot)
+        if (!starterAssetsInputs.charge && !isShooting && (timer !=0f || chargeMultiplier > initialChargeMultiplier))
         {
-            Shoot();
+            Debug.Log("is this running?");
             // shoot animation
+            ShootAnimation();
 
-            ChargeAnimation(false);
+            Shoot();
             // reset Multiplier
             chargeMultiplier = initialChargeMultiplier;
+            timer = 0f;
+            
         }
     }
 
     private void Shoot()
     {
-        Debug.Log("Shot Damage:" + shotDamage * chargeMultiplier);
-        Vector3 aimDirection = (mouseWorldPosition - spawnBulletPosition.position).normalized;
-        Instantiate(pfBulletProjectile, spawnBulletPosition.position, Quaternion.LookRotation(aimDirection, Vector3.up));
-        starterAssetsInputs.shoot = false;
-    }
-    private void ChargeAnimation(bool state)
-    {
-        animator.SetBool(_animIDCharge, state);
-        //if (state)
+        //if (hitTransform != null)
         //{
-        //    rightArmIKTarget.position = chargeTargetMax;
-        //} else
-        //{
-        //    rightArmIKTarget.position = chargeTargetOriginal;
+        //    Debug.Log(hitTransform.tag);
+        //    if (hitTransform.GetComponent<Target>() != null)
+        //    {
+        //        // Hit target
+        //        Instantiate(vfxHitGreen, transform.position, Quaternion.identity);
+        //    }
+        //    else
+        //    {
+        //        // Hit something else
+        //        Instantiate(vfxHitRed, transform.position, Quaternion.identity);
+        //    }
         //}
+
+        //Debug.Log("Shot Damage:" + shotDamage * chargeMultiplier);
+        Vector3 deathPoint = shootPointTransform.position;
+        Vector3 aimDirection = (mouseWorldPosition - vfxShootPoint.transform.position).normalized;
+        //var simpleEffect = effectToSpawn;
+        effectToSpawn.GetComponent<vfxProjectiles>().damage = shotDamage * chargeMultiplier;
+        effectToSpawn.GetComponent<vfxProjectiles>().deathPosition = deathPoint;
+        effectToSpawn.GetComponent<vfxProjectiles>().targetTransform = hitTransform;
+        Instantiate(effectToSpawn, vfxShootPoint.transform.position, Quaternion.LookRotation(aimDirection, Vector3.up));
+
+    }
+    private void AnimationStatChange(int _animID,bool state)
+    {
+        animator.SetBool(_animID, state);
+    }
+
+    private void ShootAnimation()
+    {
+        if (arrowPlaceholder)
+        {
+            Destroy(arrowPlaceholder);
+            arrowPlaceholder = null;
+        }
+        // shoot layer
+        isShooting = true;
+        animator.SetLayerWeight(2, 0.55f);
+        AnimationStatChange(_animIDShoot, true);
+
+
+        Invoke("ShootTimeAnimationEnd", 0.3f);
+    }
+
+    public void ShootTimeAnimationEnd()
+    {
+        animator.SetFloat(_animIDChargeProc, 0f);
+        AnimationStatChange(_animIDShoot, false);
+
+        animator.SetLayerWeight(2, 0f);
+        isShooting = false;
+    }
+
+    private void HandleAimations()
+    {
+        // updating aim rig IK stat all time
+        aimRig.weight = Mathf.Lerp(aimRig.weight, aimRigWieght, Time.deltaTime * 20f);
+
+    }
+
+    private void ChargeAnimation()
+    {
+        float chargeVal = animator.GetFloat(_animIDChargeProc);
+        if (chargeVal < 1f)
+        {
+            animator.SetFloat(_animIDChargeProc, (chargeMultiplier / maxChargeMultiplier) + timer);
+        }
     }
 }
