@@ -4,14 +4,25 @@ using UnityEngine;
 
 public class Stats : MonoBehaviour
 {
-    [SerializeField] private float hp = 500f;
+    [SerializeField] private float maxHp = 500f;
+    [SerializeField] private float hp;
     private float qCD = 0f;
     private float rCD = 0f;
 
+    public HpBar healthBar;
+
+    private void Start()
+    {
+        hp = maxHp;
+        healthBar.SetMaxHealth(maxHp);
+    }
     public void TakeDamage(float damageTaken)
     {
         hp -= damageTaken;
-        Debug.Log(hp);
+        healthBar.SetHealth(hp);
+
+        // cam force
+        CinemachineShake.Instance.ShakeCamera(5f, 0.3f);
     }
 
     private void Update()
@@ -23,8 +34,7 @@ public class Stats : MonoBehaviour
     {
         if (hp <= 0f)
         {
-            Debug.Log("Play Dead");
+            GameManager.Instance.EndGame();
         }
-
     }
 }

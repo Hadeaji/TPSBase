@@ -9,6 +9,7 @@ namespace StarterAssets
 	{
 		[Header("Character Input Values")]
 		public Vector2 move;
+		public Vector2 moveStore;
 		public Vector2 look;
 		public bool jump;
 		public bool sprint;
@@ -64,7 +65,18 @@ namespace StarterAssets
 
 		public void MoveInput(Vector2 newMoveDirection)
 		{
-			move = newMoveDirection;
+			// stop moving while aiming
+			if (aim)
+			{
+				move.x = 0;
+				move.y = 0;
+				moveStore = newMoveDirection;
+
+			} else
+            {
+				move = newMoveDirection;
+				moveStore = newMoveDirection;
+            }
 		} 
 
 		public void LookInput(Vector2 newLookDirection)
@@ -85,6 +97,11 @@ namespace StarterAssets
 		public void AimInput(bool newAimState)
 		{
 			aim = newAimState;
+
+			// reset move values
+			move.x = 0;
+			move.y = 0;
+
 		}
 
 		public void ChargeInput(bool newChargeState)

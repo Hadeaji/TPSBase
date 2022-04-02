@@ -23,21 +23,6 @@ public class vfxProjectiles : MonoBehaviour
         }
         CheckDeath();
     }
-
-    //private void OnTriggerEnter(Collider other)
-    //{
-    //    if (other.gameObject.tag == "Player") return;
-    //    speed = 0;
-    //    //Debug.Log(other.tag);
-    //    //Debug.Log(damage);
-    //    //Destroy(gameObject);
-    //}
-
-    //private void OnDestroy()
-    //{
-    //    Instantiate(vfxDestroyEffect, transform.position, Quaternion.identity);
-    //}
-
     void CheckDeath()
     {
         Vector3 a = gameObject.transform.position;
@@ -64,7 +49,7 @@ public class vfxProjectiles : MonoBehaviour
             if (targetScript != null)
             {
                 // Hit target
-                targetScript.health -= damage;
+                targetScript.TakeDamage(damage);
             }
         }
     }

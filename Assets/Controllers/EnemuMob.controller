@@ -34,7 +34,7 @@ BlendTree:
   m_Name: Blend Tree
   m_Childs:
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: 967efec73ed05dc49836f5aa4cb83c0d, type: 2}
+    m_Motion: {fileID: 7400000, guid: 68c15b5a063356140b288627046415b9, type: 2}
     m_Threshold: 0
     m_Position: {x: 0, y: 0}
     m_TimeScale: 1
@@ -43,7 +43,7 @@ BlendTree:
     m_Mirror: 0
   - serializedVersion: 2
     m_Motion: {fileID: 7400000, guid: 854612112f7afa141a9f0b8aec801824, type: 2}
-    m_Threshold: 0.5
+    m_Threshold: 0.33
     m_Position: {x: 0, y: 0}
     m_TimeScale: 1
     m_CycleOffset: 0
@@ -51,7 +51,7 @@ BlendTree:
     m_Mirror: 0
   - serializedVersion: 2
     m_Motion: {fileID: 7400000, guid: 2ee1a0d02a94ee543a5f99dc4674add8, type: 2}
-    m_Threshold: 1
+    m_Threshold: 0.66
     m_Position: {x: -1, y: 0}
     m_TimeScale: 1
     m_CycleOffset: 0
@@ -60,8 +60,8 @@ BlendTree:
   m_BlendParameter: MoveSet
   m_BlendParameterY: Blend
   m_MinThreshold: 0
-  m_MaxThreshold: 1
-  m_UseAutomaticThresholds: 1
+  m_MaxThreshold: 0.66
+  m_UseAutomaticThresholds: 0
   m_NormalizedBlendValues: 0
   m_BlendType: 0
 --- !u!91 &9100000
@@ -75,7 +75,7 @@ AnimatorController:
   m_AnimatorParameters:
   - m_Name: MoveSet
     m_Type: 1
-    m_DefaultFloat: 0.5
+    m_DefaultFloat: 0.33
     m_DefaultInt: 0
     m_DefaultBool: 0
     m_Controller: {fileID: 0}

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Target : MonoBehaviour
 {
-    public float health = 200f;
+    public float health;
     public float maxHealth = 200f;
     private Material[] childMats;
     private bool isDead = false;
@@ -15,16 +15,23 @@ public class Target : MonoBehaviour
 
     public float radius = 5.0F;
     public float power = 10.0F;
+
+    public HpBar healthBar;
+
     void Start()
     {
         GameObject child = gameObject.transform.GetChild(0).gameObject;
         Renderer ma = child.GetComponent<Renderer>();
         childMats = ma.materials;
-        Debug.Log(childMats);
+
         foreach (Material mat in childMats)
         {
             mat.SetFloat("_EmissiveExposureWeight", 0.5f);
         }
+
+        health = maxHealth;
+        healthBar.SetMaxHealth(maxHealth);
+
     }
 
     // Update is called once per frame
@@ -49,6 +56,7 @@ public class Target : MonoBehaviour
     {
         if (isDead == true)
         {
+            
             timer += Time.deltaTime;
             foreach (Material mat in childMats)
             {
@@ -57,16 +65,20 @@ public class Target : MonoBehaviour
         }
         if (timer >= 0.7f)
         {
-
-            isDead= false;
+            GameManager.Instance.mobsCount -= 1;
+            GameManager.Instance.kills += 1;
+            isDead = false;
             timer = 0f;
             Destroy(gameObject);
         }
-        //if (timer >= 0.01f)
-        //{
-        //    //gameObject.GetComponent<Rigidbody>().useGravity = false;
-        //    //gameObject.GetComponent<Rigidbody>().velocity = new Vector3(0, 1f, 0);
-        //}
+    }
+
+    public void TakeDamage(float damageTaken)
+    {
+        health -= damageTaken;
+        healthBar.SetHealth(health);
+
+        // Stagger at some point
     }
 
 }

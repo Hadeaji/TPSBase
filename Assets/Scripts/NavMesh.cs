@@ -5,7 +5,7 @@ using UnityEngine.AI;
 
 public class NavMesh : MonoBehaviour
 {
-    [SerializeField] private Transform moveTransform;
+    [SerializeField] public Transform moveTransform;
     private NavMeshAgent navMeshAgent;
     private Animator _animator;
     public bool isAttacking;
@@ -33,6 +33,7 @@ public class NavMesh : MonoBehaviour
     {
         navMeshAgent.destination = moveTransform.position;
         CheckAttack();
+        CheckRotationAndStop();
     }
 
     private void CheckAttack()
@@ -87,6 +88,7 @@ public class NavMesh : MonoBehaviour
     }
 
     // Activate and deactivate collider boxes---
+    #region colliderBoxes
     public void ActivateRHandCollider()
     {
         RHandCollider.SetActive(true);
@@ -107,7 +109,13 @@ public class NavMesh : MonoBehaviour
         LHandCollider.SetActive(false);
         AttackColliderDeact();
     }
+    #endregion
     // ------------------
+    private void CheckRotationAndStop()
+    {
+        if (!(navMeshAgent.velocity == Vector3.zero)) return;
 
+        gameObject.transform.LookAt(moveTransform);
+    }
 
 }

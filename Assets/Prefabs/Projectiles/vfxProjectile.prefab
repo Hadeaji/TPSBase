@@ -53,6 +53,7 @@ MonoBehaviour:
   vfxDestroyEffect: {fileID: 4929051738320673327, guid: 747ebdf49205bc746b9e552280a4b1ae, type: 3}
   damage: 30
   deathPosition: {x: 4.7470713, y: 8.045063, z: 10.423001}
+  targetTransform: {fileID: 0}
 --- !u!136 &3657672982722136905
 CapsuleCollider:
   m_ObjectHideFlags: 0

@@ -74,9 +74,17 @@ public class ThirdPersonConfig : MonoBehaviour
 
         HandleWorldMousePositoion();
         HandleAim();
+        HandleStopMove();
         HandleShooting();
 
         HandleAimations();
+    }
+    private void HandleStopMove()
+    {
+        if (!starterAssetsInputs.aim)
+        {
+            starterAssetsInputs.move = starterAssetsInputs.moveStore;
+        }
     }
 
     private void OnAimStopped()
@@ -119,6 +127,7 @@ public class ThirdPersonConfig : MonoBehaviour
         {
             OnAimStarted();
             AimAnimations();
+
         }
         else
         {
@@ -235,16 +244,17 @@ public class ThirdPersonConfig : MonoBehaviour
 
     private void ShootAnimation()
     {
-        if (arrowPlaceholder)
-        {
-            Destroy(arrowPlaceholder);
-            arrowPlaceholder = null;
-        }
+        //if (arrowPlaceholder)
+        //{
+        //    Destroy(arrowPlaceholder);
+        //    arrowPlaceholder = null;
+        //}
         // shoot layer
         isShooting = true;
         animator.SetLayerWeight(2, 0.55f);
         AnimationStatChange(_animIDShoot, true);
 
+        FindObjectOfType<AudioManager>().Play("arrow1");
 
         Invoke("ShootTimeAnimationEnd", 0.3f);
     }
