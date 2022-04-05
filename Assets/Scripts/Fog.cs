@@ -21,9 +21,4 @@ public class Fog : MonoBehaviour
         }
     }
 
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.tag != "Player") return;
-        damageTimer = 0f;
-    }
 }
